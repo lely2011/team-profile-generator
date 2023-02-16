@@ -1,65 +1,145 @@
 // GIVEN a command-line application that accepts user input
 const inquirer = require('inquirer');
 const fs = require ('fs');
+const manager = require("./lib/manager.js");
+const engineer = require("./lib/engineer.js");
+const intern = require("./lib/intern.js");
+const path = require("path");
+const OUTPUT_DIR = path.resolve(_diname, "output");
+const outputPath = path.join(OUTPUT_DIR, "team.html");
+const generateForm = require("./src/template.js");
 
-const generateForm = ({name, jobTitle, description, gitHub, email }) =>
+teamAray = [];
 
-` <div class="card" style="width: 18rem;">
-<div class="card-body">
-  <h5 class="card-title">${name}</h5>
-  <h6 class="card-subtitle mb-2 text-muted">${jobTitle}</h6>
-  <p class="card-text">${description}</p>
-  <a href="#" class="card-link">${gitHub}</a>
-  <a href="#" class="card-link">${email}</a>
-</div>
-</div>`
+function runApp () {
+  inquirer.prompt([{
+    type: "list",
+    message: "What type of employee are you adding to your team?",
+    name: "addEmployeePrompt",
+    choices: ["Manager", "Engineer", "Intern", "No additional team members at this time."]
+  }]).then(function (userInput) {
+    switch(userInput.addEmployeePrompt) {
+      case "manager":
+        addManager();
+        break;
+      case "engineer":
+        addEngineer();
+        break;
+      case "intern":
+        addIntern();
+        break;
 
+        default:
+          htmlBuilder();
+    }
+  })
+}
 
-inquirer
-  .prompt([
+function addManager() {
+inquirer.prompt([
+  {
+    type: "input",
+    name: "managername",
+    message: "What is your manager's name?"
+  },
+  {
+    type: "input",
+    name: "managerId",
+    message: "What is the manager's employee ID number?",
+  },
+  {
+    type: "input",
+    name: "managerEmail",
+    message: "What is the manager's email address?",
+  },
+  {
+    type: "input",
+    name: "managerOfficeNumber",
+    message: "What is the manager's email address?"
+  },
+  
+  ]).then(answers => {
+    const manager = new manager (answers.managerName, answers.managerId, answers.managerEmail, answers.managerOfficeNumber);
+    teamArray.push(manager);
+    createTeam();
+  });
+}
+
+function addEngineer() {
+  inquirer.prompt([
+    
     {
-      type: 'input',
-      name: 'name',
-      message: 'What is your name?',
+      type: "input",
+      name: "engineerName",
+      message: "What is the engineer's name?"
     },
+
     {
-        type: 'input',
-        name: 'jobTitle',
-        message: 'What is your job title?',
-      },
-      {
-        type: 'input',
-        name: 'description',
-        message: 'Tell us about yourself?',
-      },
-      {
-        type: 'input',
-        name: 'gitHub',
-        message: 'What is your github username?',
-      },
-      {
-        type: 'input',
-        name: 'email',
-        message: 'What is your email?',
-      },
-      
-  ])
+      type: "input",
+      name: "engineerId",
+      message: "What is the engineer's employee ID number?" 
+    },
 
-// WHEN I am prompted for my team members and their information
-// THEN an HTML file is generated that displays a nicely formatted team roster based on user input
+    {
+      type: "input",
+      name: "engineerEmail",
+      message: "What is the engineer's email address?"
+    },
 
+    {
+      type: "input",
+      name: "engineerGithub",
+      message: "What is the engineer's GitHub username?"
+    }
 
-// WHEN I click on an email address in the HTML
-// THEN my default email program opens and populates the TO field of the email with the address
-// WHEN I click on the GitHub username
-// THEN that GitHub profile opens in a new tab
-// WHEN I start the application
-// THEN I am prompted to enter the team manager’s name, employee ID, email address, and office number
-// WHEN I enter the team manager’s name, employee ID, email address, and office number
-// THEN I am presented with a menu with the option to add an engineer or an intern or to finish building my team
-// WHEN I select the engineer option
-// THEN I am prompted to enter the engineer’s name, ID, email, and GitHub username, and I am taken back to the menu
-// WHEN I select the intern option
-// THEN I am prompted to enter the intern’s name, ID, email, and school, and I am taken back to the menu
-// WHEN I decide to finish building my team
-// THEN I exit the application, and the HTML is generated 
+  ]).then(answers => {
+    const engineer = new Engineer(answers.engineerName, answers.engineerId, answers.engineerEmail, answers.engineerGithub);
+    teamArray.push(engineer);
+    createTeam();
+  });
+
+}
+
+function addIntern() {
+  inquirer.prompt([
+    
+    {
+      type: "input",
+      name: "internName",
+      message: "What is the intern's name?"
+    },
+
+    {
+      type: "input",
+      name: "internId",
+      message: "What is the intern's employee ID number?" 
+    },
+
+    {
+      type: "input",
+      name: "internEmail",
+      message: "What is the intern's email address?"
+    },
+
+    {
+      type: "input",
+      name: "internSchool",
+      message: "What school does the intern attend?"
+    }
+
+  ]).then(answers => {
+    const intern = new Intern(answers.internName, answers.internId, answers.internEmail, answers.internSchool);
+    teamArray.push(intern);
+    createTeam();
+  });
+
+}
+
+function htmlBuilder () {
+  console.log("Team Created!")
+  fs.writeFileSync(outputPath, generateForm(teamArray), "utf-8")
+}
+
+createTeam();
+
+runApp();
